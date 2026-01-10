@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ME SUPREME™ | SYSTEM INTERFACE</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="theme-default">
+
+    <div class="live-wallpaper">
+        <div class="energy-wave w1"></div>
+        <div class="energy-wave w2"></div>
+        <div class="mana-drift"></div>
+        <div class="scanlines"></div>
+    </div>
+
+    <div id="system-overlay" class="system-overlay">
+        <div class="overlay-content">
+            <p id="overlay-label" class="glitch" data-text="SYSTEM MESSAGE">SYSTEM MESSAGE</p>
+            <h1 id="overlay-title">INITIALIZING</h1>
+            <p id="overlay-desc">Authenticating Player Identity...</p>
+            <div id="overlay-rewards" class="reward-list"></div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content panel">
+            <div class="modal-header-nav">
+                <h3>SYSTEM SETTINGS</h3>
+                <div class="settings-nav">
+                    <button onclick="showTab('quests-tab')">QUESTS</button>
+                    <button onclick="showTab('themes-tab')">THEMES</button>
+                    <button onclick="showTab('archive-tab')">ARCHIVE</button>
+                </div>
+            </div>
+            <div id="quests-tab" class="tab-content">
+                <div id="settings-list"></div>
+            </div>
+            <div id="themes-tab" class="tab-content" style="display:none;">
+                <p>Select System Essence:</p>
+                <div class="theme-swatch-grid">
+                    <div class="swatch-item" onclick="setTheme('default')"><div class="swatch t-default"></div><span>CYAN</span></div>
+                    <div class="swatch-item" onclick="setTheme('red')"><div class="swatch t-red"></div><span>RED</span></div>
+                    <div class="swatch-item" onclick="setTheme('green')"><div class="swatch t-green"></div><span>GREEN</span></div>
+                    <div class="swatch-item" onclick="setTheme('purple')"><div class="swatch t-purple"></div><span>PURPLE</span></div>
+                </div>
+            </div>
+            <div id="archive-tab" class="tab-content" style="display:none;">
+                <div id="archive-list" class="archive-view"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="resetSystem()" class="btn-danger">⚠️ FULL SYSTEM RESET</button>
+                <button onclick="closeSettings()" class="btn-action">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="system-container">
+        <header class="panel header-panel">
+            <div class="header-left">
+                <div class="player-branding">
+                    <img src="icons/icon-512.png" alt="Logo" class="app-logo">
+                    <div>
+                        <p class="system-label">PLAYER STATUS</p>
+                        <h1 class="player-name">RAKSHITH</h1>
+                    </div>
+                </div>
+                <div class="status-row">
+                    RANK: <span id="rank-val" class="glow-text">E</span> | 
+                    CLASS: <span id="cls-val" class="glow-text">AWAKENED</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button onclick="openSettings()" class="settings-btn">⚙️ SYSTEM SETTINGS</button>
+                <div id="live-time" class="time-display">00:00:00</div>
+                <div class="streak-badge">🔥 STREAK: <span id="streak-val">0</span> DAYS</div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <aside class="left-col">
+                <div class="panel level-card">
+                    <h3>LEVEL: <span id="lvl-val">1</span></h3>
+                    <div class="bar-bg"><div id="exp-fill" class="fill"></div></div>
+                    <p id="exp-text">0 / 100 EXP</p>
+                </div>
+                <div class="panel stats-card">
+                    <h3>ATTRIBUTES</h3>
+                    <div id="stats-container"></div>
+                </div>
+                <div class="panel chart-card">
+                    <h3>DISTRIBUTION</h3>
+                    <div class="chart-container"><canvas id="statChart"></canvas></div>
+                </div>
+            </aside>
+            <main class="right-col">
+                <div class="panel quest-card">
+                    <div class="panel-header">
+                        <h3>DAILY QUESTS</h3>
+                        <div id="daily-timer" class="timer">RESET: 00:00:00</div>
+                    </div>
+                    <div id="quest-list"></div>
+                </div>
+                <div class="panel boss-card">
+                    <div class="panel-header">
+                        <h3 class="boss-title">WEEKLY BOSS: THE ARCHITECT</h3>
+                        <div id="weekly-timer" class="timer">0d 0h 0m</div>
+                    </div>
+                    <div class="bar-bg boss-bar"><div id="boss-fill" class="fill"></div></div>
+                    <p>PROGRESS: <span id="boss-progress-text">0/5</span> PERFECT DAYS</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="audio-vault" style="display:none;">
+        <audio id="sfx-idle" src="sounds/idle.mp3" loop></audio>
+        <audio id="sfx-click" src="sounds/click.mp3"></audio>
+        <audio id="sfx-quest" src="sounds/complete.mp3"></audio>
+        <audio id="sfx-level" src="sounds/levelup.mp3"></audio>
+        <audio id="sfx-rank" src="sounds/rankup.mp3"></audio>
+        <audio id="sfx-class" src="sounds/classup.mp3"></audio>
+        <audio id="sfx-boss" src="sounds/warning.mp3"></audio>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
