@@ -156,14 +156,35 @@ function openSettings() {
 function updQ(id, f, v) { data.quests.find(x => x.id === id)[f] = v; save(); render(); }
 function closeSettings() { playSound('sfx-click'); document.getElementById('settings-modal').style.display = 'none'; }
 function resetSystem() { if(confirm("ABORT SYSTEM DATA?")) { localStorage.clear(); location.reload(); } }
+// --- UPDATED BOSS & RESET TIMERS ---
 setInterval(() => {
-    const now = new Date(); document.getElementById('live-time').innerText = now.toLocaleTimeString('en-IN');
-    const end = new Date(); end.setHours(23,59,59);
-    const dDiff = end - now;
-    document.getElementById('daily-timer').innerText = `RESET: ${Math.floor(dDiff/3600000)}h ${Math.floor((dDiff%3600000)/60000)}m`;
+    const now = new Date();
+    
+    // 1. Live Clock (IST)
+    document.getElementById('live-time').innerText = now.toLocaleTimeString('en-IN');
+
+    // 2. Daily Reset Timer (Midnight tonight)
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+    const dailyDiff = endOfDay - now;
+    const dH = Math.floor(dailyDiff / 3600000);
+    const dM = Math.floor((dailyDiff % 3600000) / 60000);
+    document.getElementById('daily-timer').innerText = `RESET: ${dH}h ${dM}m`;
+
+    // 3. Weekly Boss Timer (Next Thursday 00:00)
+    let nextThur = new Date();
+    // Calculate days until next Thursday (Thursday is day 4)
+    let daysUntilThur = (4 - now.getDay() + 7) % 7;
+    // If today is Thursday, set it to 7 days from now to show the full week
+    if (daysUntilThur === 0) daysUntilThur = 7; 
+    
+    nextThur.setDate(now.getDate() + daysUntilThur);
+    nextThur.setHours(0, 0, 0, 0);
+
+    const weeklyDiff = nextThur - now;
+    const wD = Math.floor(weeklyDiff / 86400000);
+    const wH = Math.floor((weeklyDiff % 86400000) / 3600000);
+    const wM = Math.floor((weeklyDiff % 3600000) / 60000);
+    
+    document.getElementById('weekly-timer').innerText = `${wD}d ${wH}h ${wM}m`;
 }, 1000);
-window.onload = () => { maintenance(); render(); };
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log("Service Worker Registered"));
-}
