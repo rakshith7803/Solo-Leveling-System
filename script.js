@@ -1,4 +1,4 @@
-const DATA_VERSION = "V15_FINAL";
+const DATA_VERSION = "V16_MONARCH"; // Updated version to force clear old bugs
 
 const INITIAL_QUESTS = [
     { id: 1, name: "Go to Gym and Workout", exp: 100, stat: "strength", gain: 1 },
@@ -8,7 +8,8 @@ const INITIAL_QUESTS = [
     { id: 5, name: "Follow Diet & Avoid Junk", exp: 150, stat: "vitality", gain: 1 }
 ];
 
-let data = JSON.parse(localStorage.getItem("ME_SUPREME_V15")) || {
+// Load data or initialize with Monarch defaults
+let data = JSON.parse(localStorage.getItem("ME_SUPREME_V16")) || {
     version: DATA_VERSION, level: 1, exp: 0, streak: 0, lastDayKey: null,
     class: "AWAKENED", theme: 'default',
     stats: { strength: 0, intelligence: 0, mentality: 0, vitality: 0, willpower: 0 },
@@ -16,10 +17,43 @@ let data = JSON.parse(localStorage.getItem("ME_SUPREME_V15")) || {
     quests: [...INITIAL_QUESTS], archive: []
 };
 
-let statChart;
-const save = () => localStorage.setItem("ME_SUPREME_V15", JSON.stringify(data));
+const save = () => localStorage.setItem("ME_SUPREME_V16", JSON.stringify(data));
 const getDayKey = () => Math.floor((new Date().getTime() + (5.5 * 3600000)) / 86400000);
 
+// --- FIXED TIMER ENGINE ---
+function startTimers() {
+    setInterval(() => {
+        const now = new Date();
+        
+        // 1. Clock
+        document.getElementById('live-time').innerText = now.toLocaleTimeString('en-IN');
+
+        // 2. Daily Reset
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+        const dailyDiff = endOfDay - now;
+        const dH = Math.floor(dailyDiff / 3600000);
+        const dM = Math.floor((dailyDiff % 3600000) / 60000);
+        document.getElementById('daily-timer').innerText = `RESET: ${dH}h ${dM}m`;
+
+        // 3. Weekly Boss (Fixed Logic)
+        let nextThur = new Date();
+        let daysUntilThur = (4 - now.getDay() + 7) % 7; 
+        if (daysUntilThur === 0) daysUntilThur = 7; 
+        nextThur.setDate(now.getDate() + daysUntilThur);
+        nextThur.setHours(0, 0, 0, 0);
+
+        const weeklyDiff = nextThur - now;
+        const wD = Math.floor(weeklyDiff / 86400000);
+        const wH = Math.floor((weeklyDiff % 86400000) / 3600000);
+        const wM = Math.floor((weeklyDiff % 3600000) / 60000);
+        
+        const timerEl = document.getElementById('weekly-timer');
+        if (timerEl) timerEl.innerText = `${wD}d ${wH}h ${wM}m`;
+    }, 1000);
+}
+
+// --- CORE SYSTEM FUNCTIONS ---
 const playSound = (id) => {
     const s = document.getElementById(id);
     if (s) { s.currentTime = 0; s.play().catch(() => {}); }
@@ -43,7 +77,6 @@ function triggerSystemEvent(type, title, desc, rewards = []) {
     if (type === 'level') playSound('sfx-level');
     else if (type === 'class') playSound('sfx-class');
     else if (type === 'rank') playSound('sfx-rank');
-    else if (type === 'raid') playSound('sfx-boss');
     else playSound('sfx-quest');
 
     overlay.classList.add('active');
@@ -88,16 +121,22 @@ function maintenance() {
     const today = getDayKey();
     if (data.lastDayKey && data.lastDayKey !== today) {
         if (data.completedToday.length < data.quests.length) {
-            data.streak = 0; triggerSystemEvent('penalty', 'STREAK RESET', 'Quest failed yesterday.');
+            data.streak = 0;
+            triggerSystemEvent('penalty', 'STREAK RESET', 'Quest failed yesterday.');
         }
         if (new Date().getDay() === 4 && !data.bossRewarded) {
             if (data.weeklyProgress >= 5) {
-                data.exp += 1500; Object.keys(data.stats).forEach(k => data.stats[k] += 2);
+                data.exp += 1500;
+                Object.keys(data.stats).forEach(k => data.stats[k] += 2);
                 triggerSystemEvent('raid', 'BOSS SLAIN', 'Raid Cleared.', ['1500 EXP', '2 All Stats']);
             }
-            data.weeklyProgress = 0; data.bossRewarded = true;
-        } else if (new Date().getDay() !== 4) data.bossRewarded = false;
-        data.completedToday = []; data.lastDayKey = today;
+            data.weeklyProgress = 0;
+            data.bossRewarded = true;
+        } else if (new Date().getDay() !== 4) {
+            data.bossRewarded = false;
+        }
+        data.completedToday = [];
+        data.lastDayKey = today;
     }
     save();
 }
@@ -132,8 +171,10 @@ function updateChart() {
     const ctx = document.getElementById('statChart').getContext('2d');
     const vals = Object.values(data.stats);
     const chartData = vals.every(v => v === 0) ? [1,1,1,1,1] : vals;
-    if (statChart) { statChart.data.datasets[0].data = chartData; statChart.update(); }
-    else {
+    if (statChart) { 
+        statChart.data.datasets[0].data = chartData; 
+        statChart.update(); 
+    } else {
         statChart = new Chart(ctx, {
             type: 'pie',
             data: { labels: ['STR', 'INT', 'MEN', 'VIT', 'WIL'], datasets: [{ data: chartData, backgroundColor: ['#ff4d4d', '#00f2ff', '#a55eea', '#20bf6b', '#f7b731'], borderWidth: 0 }] },
@@ -142,49 +183,16 @@ function updateChart() {
     }
 }
 
-function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none'); document.getElementById(id).style.display = 'block'; if(id==='archive-tab') renderArchive(); }
-function renderArchive() { document.getElementById('archive-list').innerHTML = data.archive.length ? data.archive.map(a => `<div><b>${a.date}</b>: Lv${a.lvl} [${a.win?'WIN':'LOSS'}]</div>`).join('') : "No history."; }
+function showTab(id) { 
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none'); 
+    document.getElementById(id).style.display = 'block'; 
+}
+
 function setTheme(t) { data.theme = t; save(); render(); }
+
 function openSettings() { 
     playSound('sfx-click');
     document.getElementById('settings-modal').style.display = 'block';
     document.getElementById('settings-list').innerHTML = data.quests.map(q => `
-        <div style="margin-bottom:8px;"><input type="text" value="${q.name}" onchange="updQ(${q.id}, 'name', this.value)" style="width:65%; background:#111; color:#fff; border:1px solid var(--main); padding:4px;">
-        <input type="number" value="${q.gain}" onchange="updQ(${q.id}, 'gain', parseInt(this.value))" style="width:30%; background:#111; color:#fff; border:1px solid var(--main); padding:4px;"></div>
-    `).join('');
-}
-function updQ(id, f, v) { data.quests.find(x => x.id === id)[f] = v; save(); render(); }
-function closeSettings() { playSound('sfx-click'); document.getElementById('settings-modal').style.display = 'none'; }
-function resetSystem() { if(confirm("ABORT SYSTEM DATA?")) { localStorage.clear(); location.reload(); } }
-// --- UPDATED BOSS & RESET TIMERS ---
-setInterval(() => {
-    const now = new Date();
-    
-    // 1. Live Clock (IST)
-    document.getElementById('live-time').innerText = now.toLocaleTimeString('en-IN');
+        <div style="margin-bottom:8px;"><input type="text" value="${q.name}" onchange="updQ(${q.id}, 'name', this.value)" style="width:65%; background:#111; color:#fff; border:1px solid
 
-    // 2. Daily Reset Timer (Midnight tonight)
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
-    const dailyDiff = endOfDay - now;
-    const dH = Math.floor(dailyDiff / 3600000);
-    const dM = Math.floor((dailyDiff % 3600000) / 60000);
-    document.getElementById('daily-timer').innerText = `RESET: ${dH}h ${dM}m`;
-
-    // 3. Weekly Boss Timer (Next Thursday 00:00)
-    let nextThur = new Date();
-    // Calculate days until next Thursday (Thursday is day 4)
-    let daysUntilThur = (4 - now.getDay() + 7) % 7;
-    // If today is Thursday, set it to 7 days from now to show the full week
-    if (daysUntilThur === 0) daysUntilThur = 7; 
-    
-    nextThur.setDate(now.getDate() + daysUntilThur);
-    nextThur.setHours(0, 0, 0, 0);
-
-    const weeklyDiff = nextThur - now;
-    const wD = Math.floor(weeklyDiff / 86400000);
-    const wH = Math.floor((weeklyDiff % 86400000) / 3600000);
-    const wM = Math.floor((weeklyDiff % 3600000) / 60000);
-    
-    document.getElementById('weekly-timer').innerText = `${wD}d ${wH}h ${wM}m`;
-}, 1000);
