@@ -38,23 +38,18 @@
                 <div class="settings-nav">
                     <button onclick="showTab('quests-tab')">QUESTS</button>
                     <button onclick="showTab('themes-tab')">THEMES</button>
-                    <button onclick="showTab('archive-tab')">ARCHIVE</button>
                 </div>
             </div>
             <div id="quests-tab" class="tab-content">
                 <div id="settings-list"></div>
             </div>
             <div id="themes-tab" class="tab-content" style="display:none;">
-                <p>Select System Essence:</p>
                 <div class="theme-swatch-grid">
                     <div class="swatch-item" onclick="setTheme('default')"><div class="swatch t-default"></div><span>CYAN</span></div>
                     <div class="swatch-item" onclick="setTheme('red')"><div class="swatch t-red"></div><span>RED</span></div>
                     <div class="swatch-item" onclick="setTheme('green')"><div class="swatch t-green"></div><span>GREEN</span></div>
                     <div class="swatch-item" onclick="setTheme('purple')"><div class="swatch t-purple"></div><span>PURPLE</span></div>
                 </div>
-            </div>
-            <div id="archive-tab" class="tab-content" style="display:none;">
-                <div id="archive-list" class="archive-view"></div>
             </div>
             <div class="modal-footer">
                 <button onclick="resetSystem()" class="btn-danger">⚠️ FULL SYSTEM RESET</button>
@@ -112,7 +107,7 @@
                 <div class="panel boss-card">
                     <div class="panel-header">
                         <h3 class="boss-title">WEEKLY BOSS: THE ARCHITECT</h3>
-                        <div id="weekly-timer" class="timer">0d 0h 0m</div>
+                        <div id="weekly-timer" class="timer">LOADING...</div>
                     </div>
                     <div class="bar-bg boss-bar"><div id="boss-fill" class="fill"></div></div>
                     <p>PROGRESS: <span id="boss-progress-text">0/5</span> PERFECT DAYS</p>
