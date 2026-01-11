@@ -1,10 +1,10 @@
 :root { --main: #00f2ff; --sub: #00a2ff; --glow: rgba(0, 242, 255, 0.5); }
 .theme-red { --main: #ff4d4d; --sub: #ff0000; --glow: rgba(255, 77, 77, 0.5); }
-.theme-purple { --main: #bc4eff; --sub: #8e44ad; --glow: rgba(188, 78, 255, 0.5); }
 
 * { box-sizing: border-box; }
 body { margin: 0; background: #01040a; color: #fff; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; transition: 0.5s; }
 
+/* ANIMATED HUD BACKGROUND */
 .live-wallpaper { position: fixed; inset: 0; z-index: -1; background: #01040a; }
 .energy-wave { position: absolute; width: 150%; height: 150%; top: -25%; left: -25%; background: radial-gradient(circle, var(--glow) 0%, transparent 70%); filter: blur(100px); opacity: 0.5; animation: wave 20s infinite alternate linear; }
 @keyframes wave { from { transform: translate(-5%, -5%) rotate(0deg); } to { transform: translate(5%, 5%) rotate(10deg); } }
@@ -12,49 +12,25 @@ body { margin: 0; background: #01040a; color: #fff; font-family: 'Rajdhani', san
 
 .system-container { max-width: 1250px; margin: auto; padding: 20px; }
 .panel { background: rgba(4, 10, 20, 0.9); border: 1px solid var(--main); padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); box-shadow: 0 0 15px var(--glow); }
-.header-panel { display: flex; justify-content: space-between; align-items: center; }
-.app-logo { width: 50px; height: 50px; border: 1px solid var(--main); box-shadow: 0 0 10px var(--glow); }
-
 .main-layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
 
-/* THE FORCE ALIGNMENT FIX */
-.quest-item { 
-    display: flex !important; 
-    flex-direction: row !important;
-    justify-content: space-between !important; 
-    align-items: center !important; 
-    width: 100% !important;
-    padding: 15px !important; 
-    background: rgba(255,255,255,0.04) !important; 
-    margin-bottom: 10px !important; 
-    border-left: 4px solid var(--main) !important;
-}
+/* QUEST ITEM ALIGNMENT FIX (Preserved from V31) */
+.quest-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.04); margin-bottom: 10px; border-left: 4px solid var(--main); }
+.quest-item span { flex: 1; margin-right: 20px; }
+.btn-action { background: var(--main); color: #000; border: none; padding: 10px 20px; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; transition: 0.3s; white-space: nowrap; }
+.btn-action:hover { box-shadow: 0 0 20px var(--main); transform: scale(1.05); }
 
-.quest-item span { 
-    flex: 1 !important; 
-    text-align: left !important;
-}
-
-.btn-action { 
-    background: var(--main) !important; 
-    color: #000 !important; 
-    border: none !important; 
-    padding: 10px 20px !important; 
-    font-family: 'Orbitron' !important; 
-    font-weight: 900 !important; 
-    cursor: pointer !important; 
-    white-space: nowrap !important; /* Prevents text from squishing */
-}
-
-/* OTHER UI ELEMENTS */
-.bar-bg { width: 100%; height: 12px; background: #000; margin: 10px 0; border: 1px solid rgba(255,255,255,0.1); border-radius: 2px; }
-.fill { height: 100%; background: linear-gradient(90deg, var(--sub), var(--main)); box-shadow: 0 0 15px var(--main); transition: width 0.7s; }
-.stat-row-ui { margin-bottom: 15px; }
-.stat-label-group { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--main); font-family: 'Orbitron'; }
-.chart-container { position: relative; height: 220px; width: 100%; margin-top: 10px; }
+/* HIGH-FIDELITY CUTSCENE EFFECTS */
 .system-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 9999; display: none; align-items: center; justify-content: center; text-align: center; }
-.system-overlay.active { display: flex; }
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; }
-.time-display { font-family: 'Orbitron'; font-size: 1.6rem; color: var(--main); }
-.timer { color: #ffd700; font-family: 'Orbitron'; font-size: 0.85rem; }
+.system-overlay.active { display: flex; animation: system-flash 0.5s forwards; }
+.glow-title { font-family: 'Orbitron'; font-size: 3.5rem; color: var(--main); text-shadow: 0 0 30px var(--main); animation: title-float 2s infinite ease-in-out; }
+.glitch-text { font-family: 'Orbitron'; letter-spacing: 5px; color: var(--main); opacity: 0.8; }
 
+@keyframes system-flash { 0% { background: var(--main); } 100% { background: rgba(0,0,0,0.98); } }
+@keyframes title-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+/* HUD PROGRESS BARS */
+.bar-bg { width: 100%; height: 12px; background: #000; margin: 10px 0; border: 1px solid rgba(255,255,255,0.1); border-radius: 2px; }
+.fill { height: 100%; background: linear-gradient(90deg, var(--sub), var(--main)); box-shadow: 0 0 15px var(--main); transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+.time-display { font-family: 'Orbitron'; font-size: 1.6rem; color: var(--main); text-shadow: 0 0 10px var(--main); }
+.timer { color: #ffd700; font-family: 'Orbitron'; font-size: 0.85rem; }
