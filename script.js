@@ -1,6 +1,6 @@
-const DATA_VERSION = "V33_ABSOLUTE_FINAL";
+const DATA_VERSION = "V34_MONARCH_ASCENSION";
 
-let data = JSON.parse(localStorage.getItem("ME_SUPREME_V33")) || {
+let data = JSON.parse(localStorage.getItem("ME_SUPREME_V34")) || {
     version: DATA_VERSION, level: 1, exp: 0, streak: 0, theme: 'default',
     class: "AWAKENED", stats: { strength: 0, intelligence: 0, mentality: 0, vitality: 0, willpower: 0 },
     weeklyProgress: 0, completedToday: [], lastDayKey: null,
@@ -14,28 +14,20 @@ let data = JSON.parse(localStorage.getItem("ME_SUPREME_V33")) || {
 };
 
 let statChart = null;
-const save = () => localStorage.setItem("ME_SUPREME_V33", JSON.stringify(data));
+const save = () => localStorage.setItem("ME_SUPREME_V34", JSON.stringify(data));
 
-// RESTORED CUTSCENE & SOUND TRIGGER
+// RESTORED CUTSCENE ENGINE
 function triggerEvent(title, desc, rewards = []) {
     const overlay = document.getElementById('system-overlay');
-    if(!overlay) return;
+    if (!overlay) return;
     document.getElementById('overlay-title').innerText = title;
     document.getElementById('overlay-desc').innerText = desc;
-    document.getElementById('overlay-rewards').innerHTML = rewards.map(r => `<div style="color:#ffd700; margin-top:5px;">+ ${r}</div>`).join('');
+    document.getElementById('overlay-rewards').innerHTML = rewards.map(r => `<div style="color:#ffd700; font-family:'Orbitron'; margin-top:5px;">+ ${r}</div>`).join('');
     
     overlay.classList.add('active');
     const sfxId = title === "LEVEL UP" ? 'sfx-level' : 'sfx-quest';
     document.getElementById(sfxId)?.play().catch(()=>{});
     setTimeout(() => overlay.classList.remove('active'), 3500);
-}
-
-// RESTORED AUDIO UNLOCKER
-function unlockAudio() {
-    const idle = document.getElementById('sfx-idle');
-    if (idle) { idle.volume = 0.15; idle.play().catch(()=>{}); }
-    document.getElementById('sfx-click')?.play().catch(()=>{});
-    document.removeEventListener('click', unlockAudio);
 }
 
 function render() {
@@ -57,7 +49,6 @@ function render() {
             <div class="bar-bg" style="height:7px;"><div class="fill" style="width: ${Math.min(v * 5, 100)}%"></div></div>
         </div>`).join('');
     
-    // QUEST LIST (Keeps button alignment fix)
     document.getElementById('quest-list').innerHTML = data.quests.map(q => `
         <div class="quest-item ${data.completedToday.includes(q.id) ? 'done' : ''}">
             <span>${q.name}</span>
@@ -74,18 +65,31 @@ function completeQuest(id) {
     data.exp += q.exp;
     data.stats[q.stat] += q.gain;
     
+    // WILLPOWER & PERFECT DAY TRIGGER
     if (data.completedToday.length === data.quests.length) {
         data.streak++; data.weeklyProgress++; data.stats.willpower++;
         triggerEvent("PERFECT DAY", "Objective Cleared", ["1 Willpower", "Streak Maintained"]);
     }
     
+    // LEVEL UP TRIGGER
     if (data.exp >= data.level * 100) {
         data.exp -= data.level * 100;
         data.level++;
-        triggerEvent("LEVEL UP", `Reached Level ${data.level}`, ["Stats Enhanced"]);
+        triggerEvent("LEVEL UP", `Reached Level ${data.level}`, ["Attributes Enhanced"]);
     }
     data.class = data.level >= 50 ? 'SHADOW MONARCH' : data.level >= 10 ? 'HUNTER' : 'AWAKENED';
     save(); render();
+}
+
+function startTimers() {
+    const run = () => {
+        const now = new Date();
+        document.getElementById('live-time').innerText = now.toLocaleTimeString('en-IN');
+        document.getElementById('daily-timer').innerText = `RESET: ${23-now.getHours()}h ${59-now.getMinutes()}m`;
+        let diff = (4 - now.getDay() + 7) % 7 || 7;
+        document.getElementById('weekly-timer').innerText = `${diff-1}d ${23-now.getHours()}h REMAINING`;
+    };
+    run(); setInterval(run, 1000);
 }
 
 function updateChart() {
@@ -100,21 +104,12 @@ function updateChart() {
     });
 }
 
-function startTimers() {
-    const run = () => {
-        const now = new Date();
-        document.getElementById('live-time').innerText = now.toLocaleTimeString('en-IN');
-        document.getElementById('daily-timer').innerText = `RESET: ${23-now.getHours()}h ${59-now.getMinutes()}m`;
-        let diff = (4 - now.getDay() + 7) % 7 || 7;
-        document.getElementById('weekly-timer').innerText = `${diff-1}d ${23-now.getHours()}h REMAINING`;
-    };
-    run(); setInterval(run, 1000);
+function unlockAudio() {
+    const idle = document.getElementById('sfx-idle');
+    if (idle) { idle.volume = 0.15; idle.play().catch(()=>{}); }
+    document.removeEventListener('click', unlockAudio);
 }
 
-function resetSystem() { if(confirm("ABORT SYSTEM?")) { localStorage.clear(); location.reload(true); } }
-function setTheme(t) { data.theme = t; save(); render(); }
-function openSettings() { document.getElementById('settings-modal').style.display='flex'; }
-function closeSettings() { document.getElementById('settings-modal').style.display='none'; }
-
+function resetSystem() { if(confirm("ABORT SYSTEM DATA?")) { localStorage.clear(); location.reload(true); } }
 window.onload = () => { render(); startTimers(); };
 document.addEventListener('click', unlockAudio);
