@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ME SUPREME™ | SYSTEM</title>
+    <title>ME SUPREME™ | SYSTEM INTERFACE</title>
     <link rel="icon" type="image/png" href="icons/icon-192.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
@@ -11,14 +11,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="theme-default">
-    <div class="live-wallpaper"><div class="energy-wave w1"></div><div class="scanlines"></div></div>
+    <div class="live-wallpaper">
+        <div class="energy-wave w1"></div>
+        <div class="energy-wave w2"></div>
+        <div class="scanlines"></div>
+    </div>
 
     <div id="system-overlay" class="system-overlay">
         <div class="overlay-content">
-            <p id="overlay-label" class="glitch-text">SYSTEM NOTIFICATION</p>
+            <p id="overlay-label" class="glitch-text" data-text="SYSTEM MESSAGE">SYSTEM MESSAGE</p>
             <h1 id="overlay-title" class="glow-title">LEVEL UP</h1>
             <p id="overlay-desc">System synchronization complete.</p>
-            <div id="overlay-rewards"></div>
+            <div id="overlay-rewards" class="reward-list"></div>
         </div>
     </div>
 
@@ -31,7 +35,7 @@
                 <button onclick="setTheme('purple')" class="t-btn t-purple">PURPLE</button>
             </div>
             <div class="modal-footer">
-                <button onclick="resetSystem()" class="btn-danger">⚠️ FULL RESET</button>
+                <button onclick="resetSystem()" class="btn-danger">⚠️ FULL SYSTEM RESET</button>
                 <button onclick="closeSettings()" class="btn-action">CLOSE</button>
             </div>
         </div>
@@ -40,24 +44,33 @@
     <div class="system-container">
         <header class="panel header-panel">
             <div class="header-left">
-                <h1 class="player-name">RAKSHITH</h1>
-                <div class="status-row">RANK: <span id="rank-val" class="glow-text">E</span> | CLASS: <span id="cls-val">AWAKENED</span></div>
+                <div class="player-branding">
+                    <img src="icons/icon-512.png" class="app-logo">
+                    <div>
+                        <p class="system-label">PLAYER STATUS</p>
+                        <h1 class="player-name">RAKSHITH</h1>
+                    </div>
+                </div>
+                <div class="status-row">
+                    RANK: <span id="rank-val" class="glow-text">E</span> | 
+                    CLASS: <span id="cls-val" class="glow-text">AWAKENED</span>
+                </div>
             </div>
             <div class="header-right">
                 <button onclick="openSettings()" class="settings-btn">⚙️ SETTINGS</button>
                 <div id="live-time" class="time-display">00:00:00</div>
-                <div class="streak-badge">🔥 STREAK: <span id="streak-val">0</span></div>
+                <div class="streak-badge">🔥 STREAK: <span id="streak-val">0</span> DAYS</div>
             </div>
         </header>
 
         <div class="main-layout">
             <aside class="left-col">
                 <div class="panel">
-                    <h3>LEVEL: <span id="lvl-val">1</span></h3>
+                    <h3>LEVEL: <span id="lvl-val" class="stat-val-text">1</span></h3>
                     <div class="bar-bg"><div id="exp-fill" class="fill"></div></div>
                     <p id="exp-text">0 / 100 EXP</p>
                 </div>
-                <div class="panel">
+                <div class="panel stats-card">
                     <h3>ATTRIBUTES</h3>
                     <div id="stats-container"></div>
                 </div>
@@ -66,21 +79,29 @@
                     <div class="chart-container"><canvas id="statChart"></canvas></div>
                 </div>
             </aside>
+
             <main class="right-col">
                 <div class="panel">
-                    <div class="panel-header"><h3>DAILY QUESTS</h3><div id="daily-timer" class="timer">RESET: --:--</div></div>
+                    <div class="panel-header">
+                        <h3>DAILY QUESTS</h3>
+                        <div id="daily-timer" class="timer">RESET: 00h 00m</div>
+                    </div>
                     <div id="quest-list"></div>
                 </div>
-                <div class="panel">
-                    <div class="panel-header"><h3>WEEKLY BOSS</h3><div id="weekly-timer" class="timer">--d --h</div></div>
-                    <div class="bar-bg"><div id="boss-fill" class="fill"></div></div>
-                    <p>PROGRESS: <span id="boss-progress-text">0/5</span></p>
+                <div class="panel boss-card">
+                    <div class="panel-header">
+                        <h3>WEEKLY BOSS: THE ARCHITECT</h3>
+                        <div id="weekly-timer" class="timer">--d --h</div>
+                    </div>
+                    <div class="bar-bg boss-bar"><div id="boss-fill" class="fill"></div></div>
+                    <p>PROGRESS: <span id="boss-progress-text">0 / 5</span> PERFECT DAYS</p>
                 </div>
             </main>
         </div>
     </div>
 
     <div style="display:none;">
+        <audio id="sfx-idle" src="sounds/idle.mp3" loop></audio>
         <audio id="sfx-click" src="sounds/click.mp3"></audio>
         <audio id="sfx-quest" src="sounds/complete.mp3"></audio>
         <audio id="sfx-level" src="sounds/levelup.mp3"></audio>
