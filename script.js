@@ -1,8 +1,9 @@
-const DATA_VERSION = "V35_MONARCH_ETERNAL";
+// --- V36 SOVEREIGN PERMANENT LOCK ---
+const STORAGE_KEY = "MONARCH_SYSTEM_DATA"; // Static key for permanent saving
 
-// 1. DATA CORE (Ensures saving works)
-let data = JSON.parse(localStorage.getItem("ME_SUPREME_V35")) || {
-    version: DATA_VERSION, level: 1, exp: 0, streak: 0, theme: 'default',
+// 1. DATA INITIALIZATION (Aggressive Loading)
+let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+    level: 1, exp: 0, streak: 0, theme: 'default',
     class: "AWAKENED", stats: { strength: 0, intelligence: 0, mentality: 0, vitality: 0, willpower: 0 },
     weeklyProgress: 0, completedToday: [], lastDayKey: null,
     quests: [
@@ -14,9 +15,11 @@ let data = JSON.parse(localStorage.getItem("ME_SUPREME_V35")) || {
     ]
 };
 
-let statChart = null;
-// Persistent Save Function
-const save = () => localStorage.setItem("ME_SUPREME_V35", JSON.stringify(data));
+// Auto-save function that triggers on every change
+const save = () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    console.log("System Data Synchronized to Vault."); 
+};
 
 // 2. SOVEREIGN AUDIO & OVERLAY ENGINE
 function triggerEvent(title, desc, rewards = []) {
@@ -35,7 +38,6 @@ function triggerEvent(title, desc, rewards = []) {
 function unlockAudio() {
     const idle = document.getElementById('sfx-idle');
     if (idle) { idle.volume = 0.15; idle.play().catch(()=>{}); }
-    document.getElementById('sfx-click')?.play().catch(()=>{});
     document.removeEventListener('click', unlockAudio);
 }
 
@@ -45,15 +47,12 @@ function updateChart() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const vals = Object.values(data.stats);
-    const chartData = vals.every(v => v === 0) ? [1,1,1,1,1] : vals;
-
     if (statChart) statChart.destroy();
     statChart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ['STR', 'INT', 'MEN', 'VIT', 'WIL'],
             datasets: [{ 
-                data: chartData, 
+                data: vals.every(v => v === 0) ? [1,1,1,1,1] : vals, 
                 backgroundColor: ['#ff4d4d', '#00f2ff', '#a55eea', '#20bf6b', '#f7b731'], 
                 borderWidth: 0 
             }]
@@ -62,7 +61,7 @@ function updateChart() {
     });
 }
 
-// 4. RENDER HUD (The UI Update Loop)
+// 4. RENDER HUD ENGINE
 function render() {
     document.body.className = 'theme-' + data.theme;
     document.getElementById('lvl-val').innerText = data.level;
@@ -91,7 +90,7 @@ function render() {
     updateChart();
 }
 
-// 5. CORE SOVEREIGN LOGIC (Quests & Growth)
+// 5. CORE LOGIC
 function completeQuest(id) {
     if (data.completedToday.includes(id)) return;
     document.getElementById('sfx-click')?.play().catch(()=>{});
@@ -100,13 +99,11 @@ function completeQuest(id) {
     data.exp += q.exp;
     data.stats[q.stat] += q.gain;
     
-    // WILLPOWER & PERFECT DAY LOGIC
     if (data.completedToday.length === data.quests.length) {
         data.streak++; data.weeklyProgress++; data.stats.willpower++;
         triggerEvent("PERFECT DAY", "Objective Cleared", ["1 Willpower", "Streak Maintained"]);
     }
     
-    // LEVEL UP LOGIC
     if (data.exp >= data.level * 100) {
         data.exp -= data.level * 100;
         data.level++;
@@ -116,20 +113,19 @@ function completeQuest(id) {
     save(); render();
 }
 
-// 6. TIMERS (Sync & Tracking)
+// 6. TIMER ENGINE
 function startTimers() {
     const run = () => {
         const now = new Date();
         document.getElementById('live-time').innerText = now.toLocaleTimeString('en-IN');
         document.getElementById('daily-timer').innerText = `RESET: ${23-now.getHours()}h ${59-now.getMinutes()}m`;
-        
         let diff = (4 - now.getDay() + 7) % 7 || 7;
         document.getElementById('weekly-timer').innerText = `${diff-1}d ${23-now.getHours()}h REMAINING`;
     };
     run(); setInterval(run, 1000);
 }
 
-// 7. SYSTEM MAINTENANCE (Daily Reset Tracking)
+// 7. SYSTEM MAINTENANCE (Daily Reset)
 function maintenance() {
     const today = Math.floor((new Date().getTime() + (5.5 * 3600000)) / 86400000);
     if (data.lastDayKey && data.lastDayKey !== today) {
@@ -137,15 +133,13 @@ function maintenance() {
         data.completedToday = [];
         data.lastDayKey = today;
     }
-    save();
+    save(); // Force save after maintenance check
 }
 
-// 8. INTERFACE CONTROLS
-function resetSystem() { if(confirm("ABORT ALL SYSTEM DATA?")) { localStorage.clear(); location.reload(true); } }
+function resetSystem() { if(confirm("ABORT SYSTEM DATA?")) { localStorage.clear(); location.reload(true); } }
 function setTheme(t) { data.theme = t; save(); render(); }
 function openSettings() { document.getElementById('settings-modal').style.display='flex'; }
 function closeSettings() { document.getElementById('settings-modal').style.display='none'; }
 
-// 9. INITIALIZATION BOOTSTRAP
 window.onload = () => { maintenance(); render(); startTimers(); };
 document.addEventListener('click', unlockAudio);
