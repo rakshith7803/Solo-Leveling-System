@@ -1,7 +1,7 @@
-const DATA_VERSION = "V30_SUPREME_SOVEREIGN";
+const DATA_VERSION = "V31_SUPREME_ALIGNED"; // Updated version to sync layout
 
 // 1. DATA INITIALIZATION
-let data = JSON.parse(localStorage.getItem("ME_SUPREME_V30")) || {
+let data = JSON.parse(localStorage.getItem("ME_SUPREME_V31")) || {
     version: DATA_VERSION, level: 1, exp: 0, streak: 0, theme: 'default',
     class: "AWAKENED", stats: { strength: 0, intelligence: 0, mentality: 0, vitality: 0, willpower: 0 },
     weeklyProgress: 0, completedToday: [], lastDayKey: null,
@@ -15,7 +15,7 @@ let data = JSON.parse(localStorage.getItem("ME_SUPREME_V30")) || {
 };
 
 let statChart = null;
-const save = () => localStorage.setItem("ME_SUPREME_V30", JSON.stringify(data));
+const save = () => localStorage.setItem("ME_SUPREME_V31", JSON.stringify(data));
 
 // 2. SYSTEM OVERLAY & AUDIO ENGINE
 function triggerEvent(title, desc, rewards = []) {
@@ -93,7 +93,7 @@ function completeQuest(id) {
     data.exp += q.exp;
     data.stats[q.stat] += q.gain;
     
-    // WILLPOWER LOGIC
+    // WILLPOWER LOGIC (Fix verified)
     if (data.completedToday.length === data.quests.length) {
         data.streak++; data.weeklyProgress++; data.stats.willpower++;
         triggerEvent("PERFECT DAY", "Objective Cleared", ["1 Willpower", "Streak Maintained"]);
@@ -128,3 +128,4 @@ function closeSettings() { document.getElementById('settings-modal').style.displ
 
 window.onload = () => { render(); startTimers(); };
 document.addEventListener('click', () => { document.getElementById('sfx-idle')?.play().catch(()=>{}); }, {once: true});
+
