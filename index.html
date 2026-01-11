@@ -3,37 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ME SUPREME™ | SYSTEM INTERFACE</title>
-    
+    <title>ME SUPREME™ | SYSTEM</title>
     <link rel="icon" type="image/png" href="icons/icon-192.png">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="manifest" href="manifest.json">
-
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="theme-default">
-    <div class="live-wallpaper">
-        <div class="energy-wave w1"></div>
-        <div class="energy-wave w2"></div>
-        <div class="scanlines"></div>
-    </div>
+    <div class="live-wallpaper"><div class="energy-wave w1"></div><div class="scanlines"></div></div>
 
     <div id="system-overlay" class="system-overlay">
         <div class="overlay-content">
-            <p id="overlay-label" class="glitch" data-text="SYSTEM MESSAGE">SYSTEM MESSAGE</p>
-            <h1 id="overlay-title">LEVEL UP</h1>
-            <p id="overlay-desc">Attributes enhanced.</p>
-            <div id="overlay-rewards" class="reward-list"></div>
+            <p id="overlay-label" class="glitch-text">SYSTEM NOTIFICATION</p>
+            <h1 id="overlay-title" class="glow-title">LEVEL UP</h1>
+            <p id="overlay-desc">System synchronization complete.</p>
+            <div id="overlay-rewards"></div>
         </div>
     </div>
 
     <div id="settings-modal" class="modal">
         <div class="modal-content panel">
             <h3>SYSTEM SETTINGS</h3>
+            <div class="theme-grid">
+                <button onclick="setTheme('default')" class="t-btn t-cyan">CYAN</button>
+                <button onclick="setTheme('red')" class="t-btn t-red">RED</button>
+                <button onclick="setTheme('purple')" class="t-btn t-purple">PURPLE</button>
+            </div>
             <div class="modal-footer">
-                <button onclick="resetSystem()" class="btn-danger">⚠️ FULL SYSTEM RESET</button>
+                <button onclick="resetSystem()" class="btn-danger">⚠️ FULL RESET</button>
                 <button onclick="closeSettings()" class="btn-action">CLOSE</button>
             </div>
         </div>
@@ -42,22 +40,13 @@
     <div class="system-container">
         <header class="panel header-panel">
             <div class="header-left">
-                <div class="player-branding">
-                    <img src="icons/icon-512.png" class="app-logo">
-                    <div>
-                        <p class="system-label">PLAYER STATUS</p>
-                        <h1 class="player-name">RAKSHITH</h1>
-                    </div>
-                </div>
-                <div class="status-row">
-                    RANK: <span id="rank-val" class="glow-text">E</span> | 
-                    CLASS: <span id="cls-val" class="glow-text">AWAKENED</span>
-                </div>
+                <h1 class="player-name">RAKSHITH</h1>
+                <div class="status-row">RANK: <span id="rank-val" class="glow-text">E</span> | CLASS: <span id="cls-val">AWAKENED</span></div>
             </div>
             <div class="header-right">
                 <button onclick="openSettings()" class="settings-btn">⚙️ SETTINGS</button>
                 <div id="live-time" class="time-display">00:00:00</div>
-                <div class="streak-badge">🔥 STREAK: <span id="streak-val">0</span> DAYS</div>
+                <div class="streak-badge">🔥 STREAK: <span id="streak-val">0</span></div>
             </div>
         </header>
 
@@ -79,31 +68,23 @@
             </aside>
             <main class="right-col">
                 <div class="panel">
-                    <div class="panel-header">
-                        <h3>DAILY QUESTS</h3>
-                        <div id="daily-timer" class="timer">RESET: 00h 00m</div>
-                    </div>
+                    <div class="panel-header"><h3>DAILY QUESTS</h3><div id="daily-timer" class="timer">RESET: --:--</div></div>
                     <div id="quest-list"></div>
                 </div>
-                <div class="panel boss-card">
-                    <div class="panel-header">
-                        <h3>WEEKLY BOSS: THE ARCHITECT</h3>
-                        <div id="weekly-timer" class="timer">LOADING...</div>
-                    </div>
-                    <div class="bar-bg boss-bar"><div id="boss-fill" class="fill"></div></div>
-                    <p>PROGRESS: <span id="boss-progress-text">0 / 5</span> PERFECT DAYS</p>
+                <div class="panel">
+                    <div class="panel-header"><h3>WEEKLY BOSS</h3><div id="weekly-timer" class="timer">--d --h</div></div>
+                    <div class="bar-bg"><div id="boss-fill" class="fill"></div></div>
+                    <p>PROGRESS: <span id="boss-progress-text">0/5</span></p>
                 </div>
             </main>
         </div>
     </div>
 
     <div style="display:none;">
-        <audio id="sfx-idle" src="sounds/idle.mp3" loop></audio>
         <audio id="sfx-click" src="sounds/click.mp3"></audio>
         <audio id="sfx-quest" src="sounds/complete.mp3"></audio>
         <audio id="sfx-level" src="sounds/levelup.mp3"></audio>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
