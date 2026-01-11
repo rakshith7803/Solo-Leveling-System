@@ -30,8 +30,21 @@ body { margin: 0; background: #01040a; color: #fff; font-family: 'Rajdhani', san
 /* PIE CHART FIX */
 .chart-container { position: relative; height: 220px; width: 100%; margin-top: 10px; }
 
+/* --- QUEST ITEM BOX FIX --- */
+.quest-item { 
+    display: flex; 
+    justify-content: space-between; /* Pushes button to far right */
+    align-items: center; 
+    padding: 15px; 
+    background: rgba(255,255,255,0.04); 
+    margin-bottom: 10px; 
+    border-left: 4px solid var(--main);
+}
+.quest-item span { flex: 1; margin-right: 20px; } /* Ensures text doesn't hit button */
+.quest-item.done { opacity: 0.3; filter: grayscale(1); }
+
 /* BUTTONS & INTERACTIONS */
-.btn-action { background: var(--main); color: #000; border: none; padding: 10px 20px; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; transition: 0.3s; }
+.btn-action { background: var(--main); color: #000; border: none; padding: 10px 20px; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; transition: 0.3s; white-space: nowrap; }
 .btn-action:hover { box-shadow: 0 0 20px var(--main); transform: scale(1.05); }
 .btn-danger { background: #ff4d4d; color: #fff; border: none; padding: 10px; cursor: pointer; font-family: 'Orbitron'; }
 
