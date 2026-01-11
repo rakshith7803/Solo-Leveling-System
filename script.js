@@ -1,10 +1,9 @@
-const DATA_VERSION = "V28_SOVEREIGN";
+const DATA_VERSION = "V29_ETHEREAL";
 
-// 1. DATA
-let data = JSON.parse(localStorage.getItem("ME_SUPREME_V28")) || {
-    version: DATA_VERSION, level: 1, exp: 0, streak: 0, class: "AWAKENED", 
-    stats: { strength: 0, intelligence: 0, mentality: 0, vitality: 0, willpower: 0 },
-    weeklyProgress: 0, completedToday: [], lastDayKey: null,
+let data = JSON.parse(localStorage.getItem("ME_SUPREME_V29")) || {
+    version: DATA_VERSION, level: 1, exp: 0, streak: 0, theme: 'default',
+    class: "AWAKENED", stats: { strength: 0, intelligence: 0, mentality: 0, vitality: 0, willpower: 0 },
+    weeklyProgress: 0, completedToday: [],
     quests: [
         { id: 1, name: "Go to Gym and Workout", exp: 100, stat: "strength", gain: 1 },
         { id: 2, name: "Solve 10 Coding Problems", exp: 120, stat: "intelligence", gain: 1 },
@@ -15,45 +14,36 @@ let data = JSON.parse(localStorage.getItem("ME_SUPREME_V28")) || {
 };
 
 let statChart = null;
-const save = () => localStorage.setItem("ME_SUPREME_V28", JSON.stringify(data));
+const save = () => localStorage.setItem("ME_SUPREME_V29", JSON.stringify(data));
 
-// 2. SYSTEM EVENTS (Cutscenes & SFX)
-function triggerEvent(title, desc, rewards = []) {
+function triggerEvent(title, desc, reward) {
     const overlay = document.getElementById('system-overlay');
     document.getElementById('overlay-title').innerText = title;
     document.getElementById('overlay-desc').innerText = desc;
-    document.getElementById('overlay-rewards').innerHTML = rewards.map(r => `<div style="color:#ffd700">+ ${r}</div>`).join('');
-    
+    document.getElementById('overlay-rewards').innerHTML = reward ? `<div style="color:#ffd700">+ ${reward}</div>` : '';
     overlay.classList.add('active');
-    const sfxId = title === "LEVEL UP" ? 'sfx-level' : 'sfx-quest';
-    document.getElementById(sfxId)?.play().catch(()=>{});
+    const sfx = title === "LEVEL UP" ? 'sfx-level' : 'sfx-quest';
+    document.getElementById(sfx)?.play().catch(()=>{});
     setTimeout(() => overlay.classList.remove('active'), 3500);
 }
 
-// 3. CHART ENGINE (Attributes Distribution)
 function updateChart() {
     const ctx = document.getElementById('statChart')?.getContext('2d');
     if (!ctx) return;
     const vals = Object.values(data.stats);
-    const chartData = vals.every(v => v === 0) ? [1,1,1,1,1] : vals;
-    
     if (statChart) statChart.destroy();
     statChart = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: ['STR', 'INT', 'MEN', 'VIT', 'WIL'],
-            datasets: [{ 
-                data: chartData, 
-                backgroundColor: ['#ff4d4d', '#00f2ff', '#a55eea', '#20bf6b', '#f7b731'], 
-                borderWidth: 0 
-            }]
+            datasets: [{ data: vals.every(v=>v===0)?[1,1,1,1,1]:vals, backgroundColor: ['#ff4d4d', '#00f2ff', '#a55eea', '#20bf6b', '#f7b731'], borderWidth: 0 }]
         },
         options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
     });
 }
 
-// 4. UI RENDER ENGINE
 function render() {
+    document.body.className = 'theme-' + data.theme;
     document.getElementById('lvl-val').innerText = data.level;
     document.getElementById('cls-val').innerText = data.class;
     document.getElementById('streak-val').innerText = data.streak;
@@ -61,17 +51,11 @@ function render() {
     
     const req = data.level * 100;
     document.getElementById('exp-fill').style.width = (data.exp/req*100) + "%";
-    document.getElementById('exp-text').innerText = `${data.exp} / ${req} EXP`;
-    
+    document.getElementById('exp-text').innerText = `${data.exp}/${req} EXP`;
     document.getElementById('boss-fill').style.width = (Math.min(data.weeklyProgress,5)/5*100) + "%";
     document.getElementById('boss-progress-text').innerText = `${Math.min(data.weeklyProgress,5)} / 5`;
 
-    document.getElementById('stats-container').innerHTML = Object.entries(data.stats).map(([k,v]) => `
-        <div class="stat-row-ui">
-            <div class="stat-label-group"><span>${k.toUpperCase()}</span><span>LVL ${v}</span></div>
-            <div class="bar-bg mini-bar"><div class="fill" style="width: ${Math.min(v*5, 100)}%"></div></div>
-        </div>`).join('');
-    
+    document.getElementById('stats-container').innerHTML = Object.entries(data.stats).map(([k,v]) => `<div style="margin-bottom:8px;"><b>${k.toUpperCase()}</b>: LVL ${v}</div>`).join('');
     document.getElementById('quest-list').innerHTML = data.quests.map(q => `
         <div class="quest-item ${data.completedToday.includes(q.id)?'done':''}">
             <span>${q.name}</span>
@@ -80,7 +64,6 @@ function render() {
     updateChart();
 }
 
-// 5. CORE SYSTEM LOGIC
 function completeQuest(id) {
     if (data.completedToday.includes(id)) return;
     document.getElementById('sfx-click')?.play().catch(()=>{});
@@ -88,36 +71,37 @@ function completeQuest(id) {
     data.completedToday.push(id);
     data.exp += q.exp;
     data.stats[q.stat] += q.gain;
-    
+
+    // FIX: WILLPOWER INCREASE
     if (data.completedToday.length === data.quests.length) {
-        data.streak++; data.weeklyProgress++;
-        triggerEvent("PERFECT DAY", "All daily objectives cleared.");
+        data.streak++;
+        data.weeklyProgress++;
+        data.stats.willpower += 1; // Explicitly adding willpower
+        triggerEvent("PERFECT DAY", "Streak Progressed", "1 Willpower gained");
     }
-    
-    const req = data.level * 100;
-    if (data.exp >= req) { data.exp -= req; data.level++; triggerEvent("LEVEL UP", `Reached Level ${data.level}`); }
+
+    if (data.exp >= data.level * 100) {
+        data.exp -= data.level * 100;
+        data.level++;
+        triggerEvent("LEVEL UP", `Reached Level ${data.level}`, "All Stats Balanced");
+    }
     data.class = data.level >= 50 ? 'SHADOW MONARCH' : data.level >= 10 ? 'HUNTER' : 'AWAKENED';
     save(); render();
 }
 
-// 6. TIMER ENGINE (Daily & Weekly)
 function startTimers() {
-    const run = () => {
+    setInterval(() => {
         const now = new Date();
         document.getElementById('live-time').innerText = now.toLocaleTimeString('en-IN');
         document.getElementById('daily-timer').innerText = `RESET: ${23-now.getHours()}h ${59-now.getMinutes()}m`;
-        
         let diff = (4 - now.getDay() + 7) % 7 || 7;
-        document.getElementById('weekly-timer').innerText = `${diff-1}d ${23-now.getHours()}h REMAINING`;
-    };
-    run(); setInterval(run, 1000);
+        document.getElementById('weekly-timer').innerText = `${diff-1}d ${23-now.getHours()}h`;
+    }, 1000);
 }
 
-// 7. INITIALIZATION
-function resetSystem() { if(confirm("ABORT SYSTEM DATA?")) { localStorage.clear(); location.reload(true); } }
+function resetSystem() { if(confirm("ABORT SYSTEM?")) { localStorage.clear(); location.reload(true); } }
+function setTheme(t) { data.theme = t; save(); render(); }
 function openSettings() { document.getElementById('settings-modal').style.display='flex'; }
 function closeSettings() { document.getElementById('settings-modal').style.display='none'; }
 
 window.onload = () => { render(); startTimers(); };
-document.addEventListener('click', () => { document.getElementById('sfx-idle')?.play().catch(()=>{}); }, {once: true});
-if ('serviceWorker' in navigator) { navigator.serviceWorker.register('service-worker.js'); }
