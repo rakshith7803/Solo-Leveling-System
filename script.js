@@ -1,6 +1,7 @@
-const DATA_VERSION = "V34_MONARCH_ASCENSION";
+const DATA_VERSION = "V35_MONARCH_ETERNAL";
 
-let data = JSON.parse(localStorage.getItem("ME_SUPREME_V34")) || {
+// 1. DATA CORE (Ensures saving works)
+let data = JSON.parse(localStorage.getItem("ME_SUPREME_V35")) || {
     version: DATA_VERSION, level: 1, exp: 0, streak: 0, theme: 'default',
     class: "AWAKENED", stats: { strength: 0, intelligence: 0, mentality: 0, vitality: 0, willpower: 0 },
     weeklyProgress: 0, completedToday: [], lastDayKey: null,
@@ -14,12 +15,13 @@ let data = JSON.parse(localStorage.getItem("ME_SUPREME_V34")) || {
 };
 
 let statChart = null;
-const save = () => localStorage.setItem("ME_SUPREME_V34", JSON.stringify(data));
+// Persistent Save Function
+const save = () => localStorage.setItem("ME_SUPREME_V35", JSON.stringify(data));
 
-// RESTORED CUTSCENE ENGINE
+// 2. SOVEREIGN AUDIO & OVERLAY ENGINE
 function triggerEvent(title, desc, rewards = []) {
     const overlay = document.getElementById('system-overlay');
-    if (!overlay) return;
+    if(!overlay) return;
     document.getElementById('overlay-title').innerText = title;
     document.getElementById('overlay-desc').innerText = desc;
     document.getElementById('overlay-rewards').innerHTML = rewards.map(r => `<div style="color:#ffd700; font-family:'Orbitron'; margin-top:5px;">+ ${r}</div>`).join('');
@@ -30,6 +32,37 @@ function triggerEvent(title, desc, rewards = []) {
     setTimeout(() => overlay.classList.remove('active'), 3500);
 }
 
+function unlockAudio() {
+    const idle = document.getElementById('sfx-idle');
+    if (idle) { idle.volume = 0.15; idle.play().catch(()=>{}); }
+    document.getElementById('sfx-click')?.play().catch(()=>{});
+    document.removeEventListener('click', unlockAudio);
+}
+
+// 3. PIE CHART DISTRIBUTION
+function updateChart() {
+    const canvas = document.getElementById('statChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const vals = Object.values(data.stats);
+    const chartData = vals.every(v => v === 0) ? [1,1,1,1,1] : vals;
+
+    if (statChart) statChart.destroy();
+    statChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['STR', 'INT', 'MEN', 'VIT', 'WIL'],
+            datasets: [{ 
+                data: chartData, 
+                backgroundColor: ['#ff4d4d', '#00f2ff', '#a55eea', '#20bf6b', '#f7b731'], 
+                borderWidth: 0 
+            }]
+        },
+        options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
+    });
+}
+
+// 4. RENDER HUD (The UI Update Loop)
 function render() {
     document.body.className = 'theme-' + data.theme;
     document.getElementById('lvl-val').innerText = data.level;
@@ -40,13 +73,14 @@ function render() {
     const req = data.level * 100;
     document.getElementById('exp-fill').style.width = (data.exp / req * 100) + "%";
     document.getElementById('exp-text').innerText = `${data.exp} / ${req} EXP`;
+    
     document.getElementById('boss-fill').style.width = (Math.min(data.weeklyProgress, 5) / 5 * 100) + "%";
     document.getElementById('boss-progress-text').innerText = `${Math.min(data.weeklyProgress, 5)} / 5`;
 
     document.getElementById('stats-container').innerHTML = Object.entries(data.stats).map(([k, v]) => `
         <div class="stat-row-ui">
             <div class="stat-label-group"><span>${k.toUpperCase()}</span><span>LVL ${v}</span></div>
-            <div class="bar-bg" style="height:7px;"><div class="fill" style="width: ${Math.min(v * 5, 100)}%"></div></div>
+            <div class="bar-bg mini-bar"><div class="fill" style="width: ${Math.min(v * 5, 100)}%"></div></div>
         </div>`).join('');
     
     document.getElementById('quest-list').innerHTML = data.quests.map(q => `
@@ -57,6 +91,7 @@ function render() {
     updateChart();
 }
 
+// 5. CORE SOVEREIGN LOGIC (Quests & Growth)
 function completeQuest(id) {
     if (data.completedToday.includes(id)) return;
     document.getElementById('sfx-click')?.play().catch(()=>{});
@@ -65,51 +100,52 @@ function completeQuest(id) {
     data.exp += q.exp;
     data.stats[q.stat] += q.gain;
     
-    // WILLPOWER & PERFECT DAY TRIGGER
+    // WILLPOWER & PERFECT DAY LOGIC
     if (data.completedToday.length === data.quests.length) {
         data.streak++; data.weeklyProgress++; data.stats.willpower++;
         triggerEvent("PERFECT DAY", "Objective Cleared", ["1 Willpower", "Streak Maintained"]);
     }
     
-    // LEVEL UP TRIGGER
+    // LEVEL UP LOGIC
     if (data.exp >= data.level * 100) {
         data.exp -= data.level * 100;
         data.level++;
-        triggerEvent("LEVEL UP", `Reached Level ${data.level}`, ["Attributes Enhanced"]);
+        triggerEvent("LEVEL UP", `Reached Level ${data.level}`, ["Stats Enhanced"]);
     }
     data.class = data.level >= 50 ? 'SHADOW MONARCH' : data.level >= 10 ? 'HUNTER' : 'AWAKENED';
     save(); render();
 }
 
+// 6. TIMERS (Sync & Tracking)
 function startTimers() {
     const run = () => {
         const now = new Date();
         document.getElementById('live-time').innerText = now.toLocaleTimeString('en-IN');
         document.getElementById('daily-timer').innerText = `RESET: ${23-now.getHours()}h ${59-now.getMinutes()}m`;
+        
         let diff = (4 - now.getDay() + 7) % 7 || 7;
         document.getElementById('weekly-timer').innerText = `${diff-1}d ${23-now.getHours()}h REMAINING`;
     };
     run(); setInterval(run, 1000);
 }
 
-function updateChart() {
-    const canvas = document.getElementById('statChart');
-    if (!canvas) return;
-    const vals = Object.values(data.stats);
-    if (statChart) statChart.destroy();
-    statChart = new Chart(canvas.getContext('2d'), {
-        type: 'pie',
-        data: { labels: ['STR', 'INT', 'MEN', 'VIT', 'WIL'], datasets: [{ data: vals.every(v=>v===0)?[1,1,1,1,1]:vals, backgroundColor: ['#ff4d4d', '#00f2ff', '#a55eea', '#20bf6b', '#f7b731'], borderWidth: 0 }] },
-        options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
-    });
+// 7. SYSTEM MAINTENANCE (Daily Reset Tracking)
+function maintenance() {
+    const today = Math.floor((new Date().getTime() + (5.5 * 3600000)) / 86400000);
+    if (data.lastDayKey && data.lastDayKey !== today) {
+        if (data.completedToday.length < data.quests.length) data.streak = 0;
+        data.completedToday = [];
+        data.lastDayKey = today;
+    }
+    save();
 }
 
-function unlockAudio() {
-    const idle = document.getElementById('sfx-idle');
-    if (idle) { idle.volume = 0.15; idle.play().catch(()=>{}); }
-    document.removeEventListener('click', unlockAudio);
-}
+// 8. INTERFACE CONTROLS
+function resetSystem() { if(confirm("ABORT ALL SYSTEM DATA?")) { localStorage.clear(); location.reload(true); } }
+function setTheme(t) { data.theme = t; save(); render(); }
+function openSettings() { document.getElementById('settings-modal').style.display='flex'; }
+function closeSettings() { document.getElementById('settings-modal').style.display='none'; }
 
-function resetSystem() { if(confirm("ABORT SYSTEM DATA?")) { localStorage.clear(); location.reload(true); } }
-window.onload = () => { render(); startTimers(); };
+// 9. INITIALIZATION BOOTSTRAP
+window.onload = () => { maintenance(); render(); startTimers(); };
 document.addEventListener('click', unlockAudio);
