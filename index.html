@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ME SUPREME™ | SYSTEM INTERFACE</title>
+    
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="manifest" href="manifest.json">
+
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="theme-default">
-
     <div class="live-wallpaper">
         <div class="energy-wave w1"></div>
         <div class="energy-wave w2"></div>
@@ -19,17 +22,16 @@
 
     <div id="system-overlay" class="system-overlay">
         <div class="overlay-content">
-            <p id="overlay-label" class="glitch">SYSTEM MESSAGE</p>
-            <h1 id="overlay-title">INITIALIZING</h1>
-            <p id="overlay-desc">Authenticating...</p>
-            <div id="overlay-rewards"></div>
+            <p id="overlay-label" class="glitch" data-text="SYSTEM MESSAGE">SYSTEM MESSAGE</p>
+            <h1 id="overlay-title">LEVEL UP</h1>
+            <p id="overlay-desc">Attributes enhanced.</p>
+            <div id="overlay-rewards" class="reward-list"></div>
         </div>
     </div>
 
     <div id="settings-modal" class="modal">
         <div class="modal-content panel">
             <h3>SYSTEM SETTINGS</h3>
-            <div id="settings-list"></div>
             <div class="modal-footer">
                 <button onclick="resetSystem()" class="btn-danger">⚠️ FULL SYSTEM RESET</button>
                 <button onclick="closeSettings()" class="btn-action">CLOSE</button>
@@ -79,17 +81,17 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h3>DAILY QUESTS</h3>
-                        <div id="daily-timer" class="timer">RESET: 00:00:00</div>
+                        <div id="daily-timer" class="timer">RESET: 00h 00m</div>
                     </div>
                     <div id="quest-list"></div>
                 </div>
-                <div class="panel">
+                <div class="panel boss-card">
                     <div class="panel-header">
-                        <h3>WEEKLY BOSS</h3>
+                        <h3>WEEKLY BOSS: THE ARCHITECT</h3>
                         <div id="weekly-timer" class="timer">LOADING...</div>
                     </div>
-                    <div class="bar-bg"><div id="boss-fill" class="fill"></div></div>
-                    <p>PROGRESS: <span id="boss-progress-text">0/5</span></p>
+                    <div class="bar-bg boss-bar"><div id="boss-fill" class="fill"></div></div>
+                    <p>PROGRESS: <span id="boss-progress-text">0 / 5</span> PERFECT DAYS</p>
                 </div>
             </main>
         </div>
